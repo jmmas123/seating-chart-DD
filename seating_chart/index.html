@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#272F32">
+<title>Dax & Daisy — Encuentra tu mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #262F32;            /* matches logo image background exactly */
+    --bg-soft: #2d363a;
+    --gold: #c9a768;          /* warm matte gold, tuned to the logo */
+    --gold-bright: #d7b880;
+    --gold-dim: #8a7a53;
+    --cream: #f2e9d4;         /* body text, warm off-white */
+    --cream-soft: #d9cfb8;
+    --muted: #9a8d6c;
+    --rule: rgba(201, 167, 104, 0.35);
+    --rule-soft: rgba(201, 167, 104, 0.18);
+    --input-bg: rgba(255, 255, 255, 0.03);
+    --input-border: rgba(201, 167, 104, 0.30);
+    --focus-border: #c9a768;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    background: var(--bg);
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100dvh;
+    -webkit-overflow-scrolling: touch;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 760px;
+    padding: clamp(1rem, 3vh, 2.5rem) clamp(1.5rem, 6vw, 4rem) 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100dvh;
+  }
+
+  /* Logo — self-contained artwork that also provides the header */
+  .monogram {
+    width: clamp(220px, 62vw, 400px);
+    height: auto;
+    display: block;
+    margin-top: clamp(0.5rem, 2vh, 1.5rem);
+    margin-bottom: clamp(0.8rem, 2.5vh, 1.6rem);
+    animation: fadeIn 1s ease-out;
+    filter: drop-shadow(0 2px 24px rgba(201, 167, 104, 0.08));
+  }
+
+  .divider {
+    width: clamp(60px, 12vw, 110px);
+    height: 1px;
+    background: var(--rule);
+    margin: 0 auto clamp(1.2rem, 3vh, 2rem);
+  }
+
+  /* Search instruction */
+  .search-label {
+    font-family: 'Cormorant SC', 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: clamp(0.85rem, 2.2vw, 1.25rem);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: clamp(1.2rem, 3vh, 1.8rem);
+    text-align: center;
+    animation: fadeIn 1s ease-out 0.2s both;
+  }
+
+  /* Search input */
+  .search-wrap {
+    width: 100%;
+    position: relative;
+    margin-bottom: 1.8rem;
+    animation: fadeIn 1s ease-out 0.35s both;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: clamp(0.85rem, 2vw, 1.2rem) 1rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.15rem, 3vw, 1.6rem);
+    font-weight: 400;
+    color: var(--cream);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+    animation: pulseGold 3.2s ease-in-out infinite;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .search-wrap input::placeholder {
+    color: var(--gold-dim);
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .search-wrap input:focus {
+    border-color: var(--focus-border);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px rgba(201, 167, 104, 0.10);
+  }
+
+  .search-wrap input.has-input {
+    animation: none;
+  }
+
+  @keyframes pulseGold {
+    0%, 100% { border-color: var(--input-border); }
+    50% { border-color: var(--gold); }
+  }
+
+  /* Results */
+  .results {
+    width: 100%;
+    flex: 1;
+  }
+
+  /* Match card */
+  .match-card {
+    text-align: center;
+    animation: cardReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    padding: 1rem 0 1.5rem;
+  }
+
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .match-card .guest-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.45rem, 4vw, 2.3rem);
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+
+  .match-card .table-number {
+    font-family: 'Cormorant SC', 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: clamp(0.8rem, 2vw, 1.15rem);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.2rem;
+  }
+
+  .match-card .table-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.8rem, 10vw, 6.2rem);
+    font-weight: 300;
+    color: var(--gold-bright);
+    line-height: 1.05;
+    margin-bottom: 0.2rem;
+    text-shadow: 0 2px 20px rgba(201, 167, 104, 0.18);
+  }
+
+  .match-card .card-rule {
+    width: 44px;
+    height: 1px;
+    background: var(--rule);
+    margin: 1.1rem auto;
+  }
+
+  .match-card .tablemates-label {
+    font-family: 'Cormorant SC', 'Cormorant Garamond', serif;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: var(--muted);
+    margin-bottom: 0.9rem;
+  }
+
+  .match-card .tablemates {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.15rem 0;
+  }
+
+  .match-card .tablemate {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    font-weight: 300;
+    color: var(--cream-soft);
+    line-height: 1.75;
+  }
+
+  .match-card .tablemate::after {
+    content: '\00a0\00a0\00b7\00a0\00a0';
+    color: var(--rule);
+  }
+
+  .match-card .tablemate:last-child::after {
+    content: '';
+  }
+
+  /* Multiple results */
+  .multi-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .multi-result-item {
+    padding: 0.95rem 0.2rem;
+    border-bottom: 1px solid var(--rule-soft);
+    cursor: pointer;
+    transition: background 0.2s, padding-left 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: cardReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .multi-result-item:last-child { border-bottom: none; }
+  .multi-result-item:nth-child(2) { animation-delay: 0.05s; }
+  .multi-result-item:nth-child(3) { animation-delay: 0.10s; }
+  .multi-result-item:nth-child(4) { animation-delay: 0.15s; }
+  .multi-result-item:nth-child(5) { animation-delay: 0.20s; }
+
+  .multi-result-item:active {
+    background: rgba(201, 167, 104, 0.06);
+  }
+
+  .multi-result-item .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.04em;
+  }
+
+  .multi-result-item .table-num {
+    font-family: 'Cormorant SC', 'Cormorant Garamond', serif;
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.25em;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* No match */
+  .no-match {
+    text-align: center;
+    padding: 1.5rem 0;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .no-match p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--cream-soft);
+    line-height: 1.7;
+  }
+
+  /* Intro overlay */
+  .intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(20, 25, 28, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: opacity 0.6s ease-out;
+  }
+
+  .intro-overlay.hiding {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .intro-card {
+    background: #262F32;
+    border: 1px solid rgba(201, 167, 104, 0.22);
+    border-radius: clamp(14px, 3vw, 22px);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.45),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(201, 167, 104, 0.10);
+    padding: clamp(2.5rem, 7vw, 4rem) clamp(1.8rem, 5vw, 3rem);
+    max-width: 540px;
+    width: 100%;
+    text-align: center;
+    animation: cardReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+
+  .intro-card .intro-monogram {
+    width: clamp(170px, 45vw, 280px);
+    height: auto;
+    margin-bottom: clamp(1.2rem, 3vw, 1.8rem);
+  }
+
+  .intro-card .intro-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 3vw, 1.45rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.75;
+    margin-bottom: clamp(1.6rem, 3.5vw, 2.2rem);
+  }
+
+  .intro-card .intro-btn {
+    display: inline-block;
+    font-family: 'Cormorant SC', 'Cormorant Garamond', serif;
+    font-size: clamp(0.72rem, 2vw, 0.9rem);
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 0.85rem 2.6rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .intro-card .intro-btn:hover,
+  .intro-card .intro-btn:active {
+    background: rgba(201, 167, 104, 0.08);
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Tablet+ */
+  @media (min-width: 600px) {
+    .multi-result-item:hover {
+      background: rgba(201, 167, 104, 0.05);
+      padding-left: 0.4rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-card">
+    <img class="intro-monogram" src="dd_logo.png" alt="Dax & Daisy — Est. April 25, 2026">
+    <div class="intro-text">
+      &iexcl;Bienvenidos a nuestra boda!
+    </div>
+    <button class="intro-btn" id="introBtn">Encontrar mi mesa</button>
+  </div>
+</div>
+
+<div class="container">
+  <img class="monogram" src="dd_logo.png" alt="Dax & Daisy — Est. April 25, 2026">
+
+  <div class="divider"></div>
+
+  <div class="search-label">Encuentra tu mesa</div>
+
+  <div class="search-wrap">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Escribe tu nombre..."
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    >
+  </div>
+
+  <div class="results" id="results"></div>
+</div>
+
+<script>
+var TABLES = {
+  1: ["Jorge Paz","Margoth de Paz","Salvador Ramírez Jr.","Argentina de Paz","Marleny Calk","Rosario Reyes","Romeo Martínez","Mirian Cruz"],
+  2: ["Salvador Ramírez Jr.","María Alicia de Ramírez","Diego Ramírez","Sebastian Reyes","Pamela Martínez","José Ventura","Karina de Ventura","Josué Paz","Lupita Retana","Jorge Paz Jr.","Vicky de Paz"],
+  3: ["Miriam Altamar","Sarah Altamar","Mike Begien","Christy Begien","Arnoldo Bichara","Eileen Bichara","Sophia Bichara","Rebecah Bichara","Arnoldo Bichara Jr.","Scott McInnis","Deisi Cruz","David Galo","Erwin Rodríguez","Johanna Galo","David Galo Cordon","Marcela Rodríguez","Mariano Galo","David Galo León","Carlos Galo","Miriam León-Saleh de Galo","Tess McInnis","Brian Haskin","Andrea Pollack"],
+  4: ["Jan Albicki","Carmen Calderón","Verónica Ferro","Ken Lambert","Evelyn Flamenco","Paula Olivares","Ricardo Mena","David Ruckel","Dawn Greenberg","Rob Whittet","Christie Bengtson Woolard","Juan Pablo Samour","Dax McInnis","Daisy McInnis"]
+};
+
+var guests = [];
+for (var table in TABLES) {
+  if (TABLES.hasOwnProperty(table)) {
+    var names = TABLES[table];
+    for (var i = 0; i < names.length; i++) {
+      guests.push({ name: names[i], table: parseInt(table) });
+    }
+  }
+}
+
+function normalize(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function search(query) {
+  var q = normalize(query).trim();
+  if (!q) return [];
+  var words = q.split(/\s+/);
+  return guests.filter(function(g) {
+    var n = normalize(g.name);
+    return words.every(function(w) { return n.includes(w); });
+  });
+}
+
+function el(tag, className, text) {
+  var e = document.createElement(tag);
+  if (className) e.className = className;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function clear(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+var input = document.getElementById('searchInput');
+var resultsEl = document.getElementById('results');
+
+function renderWelcome() {
+  clear(resultsEl);
+}
+
+function renderNoMatch() {
+  clear(resultsEl);
+  var wrap = el('div', 'no-match');
+  var p = el('p');
+  p.appendChild(document.createTextNode('No encontramos ese nombre.'));
+  p.appendChild(document.createElement('br'));
+  p.appendChild(document.createTextNode('¿Intentas con otro nombre?'));
+  wrap.appendChild(p);
+  resultsEl.appendChild(wrap);
+}
+
+function renderSingleMatch(guest) {
+  clear(resultsEl);
+  var card = el('div', 'match-card');
+  card.appendChild(el('div', 'guest-name', guest.name));
+  card.appendChild(el('div', 'table-number', 'Mesa'));
+  card.appendChild(el('div', 'table-value', String(guest.table)));
+  card.appendChild(el('div', 'card-rule'));
+  card.appendChild(el('div', 'tablemates-label', 'Te sientas con'));
+
+  var tmWrap = el('div', 'tablemates');
+  var tablemates = TABLES[guest.table].filter(function(n) { return n !== guest.name; });
+  tablemates.forEach(function(name) {
+    tmWrap.appendChild(el('span', 'tablemate', name));
+  });
+  card.appendChild(tmWrap);
+  resultsEl.appendChild(card);
+}
+
+function renderMultipleMatches(matches) {
+  clear(resultsEl);
+
+  if (matches.length <= 5) {
+    var wrap = el('div', 'multi-results');
+    matches.forEach(function(g) {
+      var item = el('div', 'multi-result-item');
+      item.appendChild(el('span', 'name', g.name));
+      item.appendChild(el('span', 'table-num', 'Mesa ' + g.table));
+      item.addEventListener('click', function() {
+        renderSingleMatch(g);
+      });
+      wrap.appendChild(item);
+    });
+    resultsEl.appendChild(wrap);
+  } else {
+    var wrap2 = el('div', 'no-match');
+    var p = el('p');
+    p.appendChild(document.createTextNode('Varios resultados.'));
+    p.appendChild(document.createElement('br'));
+    p.appendChild(document.createTextNode('Sigue escribiendo…'));
+    wrap2.appendChild(p);
+    resultsEl.appendChild(wrap2);
+  }
+}
+
+function handleSearch() {
+  var query = input.value;
+  if (query.trim()) {
+    input.classList.add('has-input');
+  } else {
+    input.classList.remove('has-input');
+  }
+  if (!query.trim()) {
+    renderWelcome();
+    return;
+  }
+  var matches = search(query);
+  if (matches.length === 0) {
+    renderNoMatch();
+  } else if (matches.length === 1) {
+    renderSingleMatch(matches[0]);
+  } else {
+    renderMultipleMatches(matches);
+  }
+}
+
+input.addEventListener('input', handleSearch);
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    handleSearch();
+    input.blur();
+  }
+});
+
+renderWelcome();
+
+// Intro overlay dismiss
+var overlay = document.getElementById('introOverlay');
+var introBtn = document.getElementById('introBtn');
+
+introBtn.addEventListener('click', function() {
+  overlay.classList.add('hiding');
+  setTimeout(function() {
+    overlay.style.display = 'none';
+    input.focus();
+  }, 600);
+});
+</script>
+</body>
+</html>
